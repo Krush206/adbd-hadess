@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#ifndef ADB_NON_ANDROID
+#ifdef _WIN32
 #include <windows.h>
 #endif
 
