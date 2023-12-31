@@ -30,12 +30,12 @@
 
 #include <android-base/logging.h>
 #include <android-base/stringprintf.h>
-#ifndef ADB_NON_ANDROID
-#include <libminijail.h>
-#endif
 
 #include "cutils/properties.h"
-#ifndef ADB_NON_ANDROID
+
+#if !ADB_NON_ANDROID
+#include <libminijail.h>
+
 #include "debuggerd/client.h"
 #include "private/android_filesystem_config.h"
 #include "selinux/android.h"
@@ -49,7 +49,7 @@
 
 static const char* root_seclabel = nullptr;
 
-#ifndef ADB_NON_ANDROID
+#if !ADB_NON_ANDROID
 static void drop_capabilities_bounding_set_if_needed(struct minijail *j) {
 #if defined(ALLOW_ADBD_ROOT)
     char value[PROPERTY_VALUE_MAX];
@@ -167,9 +167,11 @@ int adbd_main(int server_port) {
     // descriptor will always be open.
     adbd_cloexec_auth_socket();
 
+#if !ADB_NON_ANDROID
     if (ALLOW_ADBD_NO_AUTH && property_get_bool("ro.adb.secure", 0) == 0) {
         auth_required = false;
     }
+#endif
 
     adbd_auth_init();
 
@@ -183,7 +185,7 @@ int adbd_main(int server_port) {
           " unchanged.\n");
     }
 
-#ifndef ADB_NON_ANDROID
+#if !ADB_NON_ANDROID
     drop_privileges(server_port);
 #endif
 
@@ -197,7 +199,11 @@ int adbd_main(int server_port) {
     // If one of these properties is set, also listen on that port.
     // If one of the properties isn't set and we couldn't listen on usb, listen
     // on the default port.
+#if ADB_NON_ANDROID
+    char prop_port[PROPERTY_VALUE_MAX] = "5555";
+#else
     char prop_port[PROPERTY_VALUE_MAX];
+#endif
     property_get("service.adb.tcp.port", prop_port, "");
     if (prop_port[0] == '\0') {
         property_get("persist.adb.tcp.port", prop_port, "");
@@ -213,7 +219,7 @@ int adbd_main(int server_port) {
         local_init(DEFAULT_ADB_LOCAL_TRANSPORT_PORT);
     }
 
-#ifndef ADB_NON_ANDROID
+#if !ADB_NON_ANDROID
     D("adbd_main(): pre init_jdwp()");
     init_jdwp();
     D("adbd_main(): post init_jdwp()");
@@ -260,7 +266,7 @@ int main(int argc, char** argv) {
 
     close_stdin();
 
-#ifndef ADB_NON_ANDROID
+#if !ADB_NON_ANDROID
     debuggerd_init(nullptr);
 #endif
     adb_trace_init(argv);

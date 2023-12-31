@@ -28,7 +28,11 @@
 #include "adb.h"
 #include "transport.h"
 
+#if ADB_NON_ANDROID
+bool auth_required = false;
+#else
 bool auth_required = true;
+#endif
 
 void send_auth_request(atransport *t)
 {

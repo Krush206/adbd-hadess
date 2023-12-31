@@ -199,8 +199,14 @@ std::string get_connection_string() {
         "ro.product.device",
     };
 
+#if ADB_NON_ANDROID
+    {
+        char value[PROPERTY_VALUE_MAX] = "ADB non-Android";
+        const auto& prop_name = cnxn_props[0];
+#else
     for (const auto& prop_name : cnxn_props) {
         char value[PROPERTY_VALUE_MAX];
+#endif
         property_get(prop_name, value, "");
         connection_properties.push_back(
             android::base::StringPrintf("%s=%s", prop_name, value));

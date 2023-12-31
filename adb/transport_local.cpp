@@ -357,7 +357,11 @@ void local_init(int port)
 #else
     /* For the adbd daemon in the system image we need to distinguish
      * between the device, and the emulator. */
+#if ADB_NON_ANDROID
+    char is_qemu[PROPERTY_VALUE_MAX] = "0";
+#else
     char is_qemu[PROPERTY_VALUE_MAX];
+#endif
     property_get("ro.kernel.qemu", is_qemu, "");
     if (!strcmp(is_qemu, "1")) {
         /* Running inside the emulator: use QEMUD pipe as the transport. */

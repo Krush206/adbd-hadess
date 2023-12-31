@@ -72,7 +72,11 @@ void restart_root_service(int fd, void *cookie) {
         WriteFdExactly(fd, "adbd is already running as root\n");
         adb_close(fd);
     } else {
+#if ADB_NON_ANDROID
+        char value[PROPERTY_VALUE_MAX] = "1";
+#else
         char value[PROPERTY_VALUE_MAX];
+#endif
         property_get("ro.debuggable", value, "");
         if (strcmp(value, "1") != 0) {
             WriteFdExactly(fd, "adbd cannot run as root in production builds\n");
@@ -319,7 +323,7 @@ int service_to_fd(const char* name, const atransport* transport) {
         ret = unix_open(name + 4, O_RDWR | O_CLOEXEC);
     } else if(!strncmp(name, "framebuffer:", 12)) {
         ret = create_service_thread(framebuffer_service, 0);
-#ifndef ADB_NON_ANDROID
+#if !ADB_NON_ANDROID
     } else if (!strncmp(name, "jdwp:", 5)) {
         ret = create_jdwp_connection_fd(atoi(name+5));
 #endif

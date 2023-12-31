@@ -40,11 +40,9 @@
 #include <android-base/stringprintf.h>
 #include <android-base/strings.h>
 #include <log/log.h>
-#ifndef ADB_NON_ANDROID
-#include <selinux/android.h>
-#endif
-
 #if !ADB_NON_ANDROID
+#include <selinux/android.h>
+
 static bool should_use_fs_config(const std::string& path) {
     // TODO: use fs_config to configure permissions on /data.
     return android::base::StartsWith(path, "/system/") ||

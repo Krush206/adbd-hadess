@@ -417,7 +417,11 @@ asocket* create_local_service_socket(const char* name, const atransport* transpo
     D("LS(%d): bound to '%s' via %d", s->id, name, fd);
 
 #if !ADB_HOST
+#if ADB_NON_ANDROID
+    char debug[PROPERTY_VALUE_MAX] = "1";
+#else
     char debug[PROPERTY_VALUE_MAX];
+#endif
     if (!strncmp(name, "root:", 5)) {
         property_get("ro.debuggable", debug, "");
     }
